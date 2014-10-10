@@ -1,0 +1,25 @@
+<html>
+
+<head>
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/style.css')}}">
+<link rel="stylesheet" "type=text/css" href="{{url_for('static', filename='css/bootstrap.css')}}">
+<link rel="stylesheet" "type=text/css" href="{{url_for('static', filename='css/jquery-ui.min.css') }}">
+<link rel="stylesheet" "type=text/css" href="{{url_for('static', filename='css/jquery-ui.structure.min.css') }}">
+<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/bootstrap-editable.css')}}">
+<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/jquery-ui.theme.min.css')}}">
+<link rel="stylesheet" href="{{ url_for('static', filename="libraries/jquery-ui-1.8.17.custom.css")}}" type="text/css" />
+
+<script src="{{ url_for('static', filename="js/jquery.js") }}"></script>
+<script src="{{ url_for('static', filename="js/jquery-ui.min.js") }}"></script>
+<script src="{{ url_for('static', filename="js/bootstrap.js") }}"></script>
+<script src="{{ url_for('static', filename="js/bootstrap-editable.js") }}"></script>
+
+
+{% endblock %}
+<title>{% block title %}{% endblock %}</title>
+</head>
+<body>
+{% block content %}{% endblock %}
+</body>
+</html>

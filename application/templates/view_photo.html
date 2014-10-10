@@ -1,0 +1,181 @@
+{% extends "layout.html" %}
+{% block title %}View Photo{% endblock %}
+{% block head %}
+  {{ super() }}
+  <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/taggd.css') }}">
+<style>
+#caption.resizable(@direction: both) {
+  // Options: horizontal, vertical, both
+  resize: @direction;
+  // Safari fix
+  overflow: auto;
+
+}
+
+</style>
+    <script src="{{ url_for('static', filename="js/jquery.taggd.js") }}"></script>
+<script>
+var thephotoid = {{photo.id}};
+var thealbumid = {{photo.album_id}};
+var thecaption = "{{photo.caption}}";
+</script>
+    <script src="{{ url_for('static', filename="js/view_photo.js") }}"></script>
+
+{% endblock %}
+{% block content %}
+
+<div class="row">
+     <div class="col-md-2">
+
+    <div class="list-group">
+      <a href="/albums/{{photo.album_id}}/photos/html" class="list-group-item">
+        <span  id="back-to-album" class="list-group-item-text">Back to Album</span>
+      </a>
+    </div>
+
+{% if photo.location %}
+    <div  class="list-group">
+      <a href="/locations/{{photo.location.id}}" class="list-group-item">
+        <span class="list-group-item-text">{{photo.location.name}}</span>
+      </a>
+    </div>
+{% else %}
+        <span  id="add-location" class="list-group-item-text">Add Location</span>
+
+{% endif %}
+
+{% if photo.event %}
+    <div class="list-group">
+      <a href="/events/{{photo.event.id}}" class="list-group-item">
+        <span class="list-group-item-text">{{photo.event.name}}</span>
+      </a>
+    </div>
+{% else %}
+    <div class="list-group">
+      <a href="#" class="list-group-item">
+        <span id="add-event" class="list-group-item-text">Add Event</span>
+      </a>
+    </div>
+{% endif %}
+<!-- -->
+    <ul id="tags" class="list-group">
+    </ul>
+    <br />
+<button data-state="show" id="tag-edit" type="button" class="btn btn-default">Edit Tags</button>
+</div><!--end span4-->
+
+
+<div class="col-md-10">
+<img src="/albums/{{photo.album.id}}/photos/{{photo.id}}/medium"
+     id="image"
+     class="img-rounded taggd">
+</div><!--end row-->
+<div class="row" id="caption-area">
+<div class="col-md-2"></div>
+<div class="col-md-5">
+    <div class="list-group">
+      <a href="#" class="list-group-item">
+        <h5 class="list-group-item-heading"><span class="location">{{photo.location.name}}</span>, <span class="year">{{photo.date.year}}</span></h5>
+        <span  id="caption" class="list-group-item-text editable" data-type="textarea">{{photo.caption}}</span>
+      </a>
+    </div>
+</div>
+</div>
+<div class="row">
+<div class="col-md-2">
+</div><!--dummy column-->
+<div class="col-md-5">
+    <div id="comments"></div>
+    <br />
+    <div id="new-comment-input">
+              <div class="form-group">
+                <input type="text" 
+                       class="form-control"
+                       id="new-comment-text"
+                       placeholder="Enter Comment">
+              </div>
+    </div>
+</div><!--end comments column-->
+<div class="col-md-5"></div>
+</div><!--end row-->
+<div class="row">
+<div id="location-modal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title">Edit Events</h4>
+      </div>
+      <div id="location-modal-body" class="modal-body">
+        Let do some fucking locations!
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<div id="fullsize-modal" class="modal fade">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title">Photo</h4>
+      </div>
+      <div id="fullsize-modal-body"
+           class="modal-body">
+            <img class="img-responsive" id="fullsize-photo" src="/albums/{{photo.album.id}}/photos/{{photo.id}}/file">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div id="tags-modal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title">Edit tags</h4>
+      </div>
+      <div id="tags-modal-body" class="modal-body">
+        <button type="button" id="new-user-button" data-state="select">Create new user</button>
+        <br />
+            <select id="new-tag-select">
+            </select>
+          <div id="new-user-tag">
+              <form id="new-user" role="form">
+                <div class="form-group">
+                  <label for="user-first-name">First</label>
+                  <input type="text"
+                         class="form-control"
+                         value=""
+                         id="user-first-name"
+                         placeholder="Enter first name">
+                </div>
+                <div class="form-group">
+                  <label for="user-last-name">Last</label>
+                  <input type="text"
+                         class="form-control"
+                         value=""
+                         id="user-last-name"
+                         placeholder="Enter last name">
+                </div>
+              </form>
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button id="save" type="button" class="btn btn-default">Save</button>
+        <button id="close" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+</div>
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends "layout.html" %}
+{% block title %}Edit Tags{% endblock %}
+{% block head %}
+  {{ super() }}
+<script src="{{ url_for('static', filename='js/fileinput.min.js') }}"></script>
+
+
+    
+<script>
+$(document).ready(function(){
+    var albumid = {{albumid}};
+
+
+
+    $("#file").change(function (){
+        var fd = new FormData(document.getElementById("upload-form"));
+        $.ajax({
+            url: "/albums/"+albumid+"/photos",
+            type: "POST",
+            data: fd,
+            enctype: "multipart/form-data",
+            processData: false, // tell jQuery not to process the data
+            contentType: false, // tell jQuery not to set contentType
+        }).done(function(data){
+            console.log("Data:");
+            var link = "/albums/"+data.albumid+"/photos/"+data.photoid+"/thumb";
+            $("#preview").attr("src", link);
+            $("#preview").data("photo-id", data.photoid);
+            $("#file-upload").hide();
+
+        });
+       
+    });
+    
+    $("#update").on("click", function(event){
+        //event.preventDefault();
+        var temp = {caption: $("#photo-caption").val(),
+                    year: parseInt($("#photo-year").val()),
+                    month: parseInt($("#photo-month").val()),
+                    day: parseInt($("#photo-day").val())};
+
+        console.log(temp);
+        //temp.caption = $("#caption").val();
+        //temp.description = $("#description").val();
+        var photoid = $("#preview").data("photo-id");
+        $.ajax({
+
+            url: "/albums/"+albumid+"/photos/" + photoid,
+            type:"PUT",
+            data: JSON.stringify(temp),
+            contentType: "application/json",
+        }).done(function(){
+          window.location.href = "/albums/"+albumid+"/photos/html"
+        });
+    });
+    
+});
+</script>
+{% endblock %}
+{% block content %}
+  <form enctype="multipart/form-data">
+<input id="input-id" multiple type="file" class="file" data-preview-file-type="text" >
+</form>
+<img id="preview" data-photoid="" src=""/>
+<form action="/albums/{{albumid}}/photos/html"
+      role="form"
+      id="upload-form">
+
+  <div class="form-group">
+    <label for="photo-caption">Caption</label>
+    <input type="text"
+           class="form-control"
+           id="photo-caption"
+           placeholder="Enter caption for photo">
+  </div>
+  <div class="form-group">
+    <label for="photo-year">Year</label>
+    <input type="number"
+           class="form-control"
+           id="photo-year"
+           placeholder="Enter year">
+  </div>
+  <div class="form-group">
+    <label for="photo-month">Month</label>
+    <input type="number"
+           value=1
+           class="form-control"
+           id="photo-month"
+           default="1"
+           placeholder="Enter month">
+  </div>
+  <div class="form-group">
+    <label for="photo-day">Day</label>
+    <input type="number"
+           value=1
+           class="form-control"
+           id="photo-day"
+           default="1"
+           placeholder="Enter day">
+  </div>
+  <div id="file-upload" class="form-group">
+    <label for="photo-file">Select File</label>
+    <input type="file" multiple id="file" name="file">
+    <p class="help-block">Upload a photo</p>
+  </div>
+
+
+</form>
+  <button id="update" class="btn btn-default">Update</button>
+{% endblock %}

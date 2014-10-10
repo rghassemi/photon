@@ -1,0 +1,65 @@
+{% extends "layout.html" %}
+{% block title %}View Photo{% endblock %}
+{% block head %}
+  {{ super() }}
+
+<script>
+$(document).ready(function(){
+settings = {
+            url: "/users",
+
+            add_option: function(element){
+                return {value: element.id,
+                        text: element.first_name+" "+element.last_name};
+            }
+};
+
+(function( $ ) {
+    var settings = {};
+    var self = null;
+    $.fn.super_select = function( action, options ) {
+        var self = $(this);
+
+        if ( action === "initialize") {
+            settings = $.extend({}, options);
+            console.log("initialize");
+            return this;
+        }
+        
+        if ( action === "load" ) {
+            console.log("load");
+            $.getJSON(settings.url, function(data){
+                
+                $.each(data.users, function(index, element){
+                    self.append($("<option></option>")
+                        .attr("value", element.id)
+                        .text(element.first_name));
+                });
+
+            });
+        }
+
+        if (action === "clear"){
+            
+            console.log("clear");
+            //$("option").remove();
+            
+        }
+ 
+    };
+ 
+}( jQuery ));
+
+$("#test").super_select("initialize", settings);
+$("#test").super_select("load");
+$("#test").super_select("clear");
+//$("#test").reza("greenify");
+//$("#test").super_select("load", {});
+});
+</script>
+{%endblock%}
+
+{% block content %}
+<select id="test"></select>
+
+{% endblock %}

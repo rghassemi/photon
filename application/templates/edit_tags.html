@@ -1,0 +1,220 @@
+<html>
+<head>
+<!--<link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/jquery-ui.min.css') }}">
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/jquery-ui.structure.min.css') }}">
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/jquery-ui.theme.min.css') }}">
+-->
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/taggd.css') }}">
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/bootstrap.css') }}">
+<script src="{{ url_for('static', filename="js/jquery.js") }}"></script>
+<script src="{{ url_for('static', filename="js/bootstrap.js") }}"></script>
+<script src="{{ url_for('static', filename="js/jquery-ui.min.js") }}"></script>
+<script src="{{ url_for('static', filename="js/jquery.taggd.js") }}"></script>
+<script src="{{ url_for('static', filename="js/jquery.confirm.js") }}"></script>
+<script>
+var data = [];
+var settings = [];
+
+$(window).load(function () {
+    $("#new-user-tag").hide();
+    $("#new-user-button").on("click", function(){
+        console.log($(this).data("state"));
+        if($(this).data("state") == "select"){
+            $(this).data("state", "create");
+            $("#new-user-tag").show();
+            $("#new-tag-select").hide();
+        } else {
+            $(this).data("state", "select");
+            $("#new-user-tag").hide();
+            $("#new-tag-select").show();
+        }
+    });
+    $("#tag-toggle").on("click", function(){
+        if($(this).data("state") == "show"){
+            var $e = $("#omg");
+            $e.taggd('clear');
+            $(this).data("state", "hide");
+        } else {
+            var $e = $("#omg");
+            $e.taggd(settings[0]);
+            $e.taggd('items', data);
+            $(this).data("state", "show");
+        }
+    });
+
+    //http://localhost:5000/albums/2/photos/37/html
+    $("#back").on("click", function(){
+        window.location.href = "/albums/{{photo.album_id}}/photos/{{photo.id}}/html"
+    });
+
+    $.getJSON("/users", function(data){
+      $.each(data.users, function(index, element){
+         $("#new-tag-select").append($("<option></option>")
+                            .attr("value",element.id)
+                            .text(element.first_name+" "+element.last_name));
+      });
+
+    });
+    
+    var offset = $("#image").offset();
+    settings.push({
+        align: {
+            'y': 'bottom'
+        },
+        offset: {
+            'top': 0//offset.top
+        },
+
+            'handlers': { click: function(event){
+                            //console.log(event.clientX);
+                            //console.log(event.clientY);
+                            console.log(event.data)
+                            $.confirm({
+                                  text: "Are you sure you want to untag "+ event.data.text +" ?",
+                                  confirm: function(button) {
+                                      console.log(event.data);
+                                      $.ajax({
+                                              url: "/albums/{{photo.album_id}}/photos/{{photo.id}}/tags/"+event.data.id,
+                                              method: "DELETE"
+                                      }).done(function(data){
+                                          console.log(data);
+                                          window.location.href = "/albums/{{photo.album_id}}/photos/{{photo.id}}/tags/html";
+                                      });
+                                  },
+                                  cancel: function(button) {
+                                      // do something
+                                  }
+                            });
+
+                        },
+                            'mouseenter': 'show',
+                            'mouseleave': 'hide'
+        }
+    });
+
+    $("#save").on("click", function(){
+            var x = $("#new-tag-select").data("x");
+            var y = $("#new-tag-select").data("y");
+            $('#tags-modal').modal('toggle');
+
+        if($("#new-user-button").data("state") == "select"){
+            var user = $("#new-tag-select").val();
+            var temp = {x:x, y:y, user:user, type: "select"};
+          } else {
+                  var first_name = $("#user-first-name").val();
+                  var last_name = $("#user-last-name").val();
+                  var temp = {x:x,
+                              y:y,
+                              first_name: first_name,
+                              last_name: last_name,
+                              type: "create"
+                             };
+           }
+            
+        $.ajax({
+                    url: "/photos/{{photo.id}}/tags",
+                    method: "POST",
+                    data: JSON.stringify(temp), 
+                    contentType: "application/json"
+                }).done(function(data){
+                    window.location.href = "/albums/{{photo.album_id}}/photos/{{photo.id}}/tags/html";
+                });
+
+    });
+    //$("#tags-modal-body").load("/albums/{{photo.album.id}}/photos/{{photo.id}}/location/html");
+    $.getJSON("/photos/{{photo.id}}/tags", function(rsp){
+        data = rsp.tags;
+        $('.taggd').each(function (i, e) {
+            var $e = $(e);
+            //$e.taggd('clear');
+            $e.taggd(settings[i]);
+            //getSetup();
+            console.log(data);
+            //$e.taggd('items', [])
+            $e.taggd('items', data);
+            //$e.taggd('show');
+        });
+    });
+
+    $(".taggd").on("click", function(e){
+        
+        //var posX = $(this).position().left,posY = $(this).position().top;
+        var offset = $(this).offset();
+        var x = e.clientX - offset.left;
+        var y = e.clientY - offset.top;
+        var width = $(this).width();
+        var height = $(this).height();
+        //console.log(x/width);
+        //console.log(y/height);
+        $("#new-tag-select").data("x", x/width);
+        $("#new-tag-select").data("y", y/height);
+        $('#tags-modal').modal('toggle');
+
+        });
+
+
+
+    
+});
+
+
+
+
+
+
+</script>
+</head>
+<body>
+<button id="back" type="button" class="btn btn-default">Back to Photo</button>
+<br/>
+<br />
+<img id="image" class="taggd" src="/albums/{{photo.album_id}}/photos/{{photo.id}}/medium" alt="photo">
+<br/>
+<button data-state="show" id="tag-toggle" type="button" class="btn btn-default">Toggle Tags</button>
+
+<div id="tags-modal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title">Edit tags</h4>
+      </div>
+
+      <div id="tags-modal-body" class="modal-body">
+      <button type="button" id="new-user-button" data-state="select">Create new user</button>
+      <div id="new-user-tag">
+          <form id="new-user" role="form">
+            <div class="form-group">
+              <label for="user-first-name">First</label>
+              <input type="text"
+                     class="form-control"
+                     value=""
+                     id="user-first-name"
+                     placeholder="Enter first name">
+            </div>
+            <div class="form-group">
+              <label for="user-last-name">First</label>
+              <input type="text"
+                     class="form-control"
+                     value=""
+                     id="user-last-name"
+                     placeholder="Enter last name">
+            </div>
+            
+          </form>
+      </div>
+            <br />
+            <br />
+            <select id="new-tag-select">
+            </select>
+      </div>
+      <div class="modal-footer">
+        <button id="save" type="button" class="btn btn-default">Save</button>
+        <button id="close" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+</body>
+</html>

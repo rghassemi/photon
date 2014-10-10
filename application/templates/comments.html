@@ -1,0 +1,60 @@
+ <script>
+
+/*
+$(".comment").append($("<a></a>")
+             .addClass("user")
+             .text("username"));
+*/
+$(".comment").each(function(index, value){
+
+    $(this).append($("<a></a>")
+                   .addClass("user")
+                   .attr("href", "/users/"+$(this).data("userid"))
+                   .text($(this).data("first-name")+ " " + $(this).data("last-name")+": ")).append($("<span></span>").text($(this).data("comment")))
+                        .append($("<span></span>")
+                            .addClass("delete-comment")
+                            .addClass("glyphicon")
+                            .addClass("glyphicon-remove")
+                            .css("float", "right")
+                            );
+});
+
+$(".delete-comment").on("click", function(){
+    console.log("Delete Comment");
+    var commentid = $(this).parent().data("commentid")
+    $.ajax({
+        url: "/photos/{{photoid}}/comments/"+commentid,
+        method: "DELETE",
+        data: JSON.stringify({comment: commentid}),
+        contentType: "application/json"
+    }).done(function(){
+        $("#comment-"+commentid).remove();
+    });
+});
+
+/*
+$(".comment").each(function(index, item){
+    var user = $("<a></a>");
+    user.addClass("user");
+    user.text($(item).data("first-name")+ " " + $(item).data("last-name")+": ");
+    $(this).append(user);
+    $(this).text($(this).data("comment"));
+});
+*/
+ </script>
+ <h3>Comments</h3>
+ <ul class="list-group">
+{% for comment in comments %}
+<li class="list-group-item comment"
+    id="comment-{{comment.id}}"
+    data-first-name="{{comment.user.first_name}}"
+    data-last-name="{{comment.user.last_name}}"
+    data-userid="{{comment.user.id}}"
+    data-commentid="{{comment.id}}"
+    data-comment="{{comment.text}}">
+         <!--class="delete-comment glyphicon glyphicon-remove">-->
+
+</li>
+
+{% endfor %}
+</ul>

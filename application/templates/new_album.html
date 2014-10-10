@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+{% block title %}New Album{% endblock %}
+{% block head %}
+  {{ super() }}
+<script>
+$(document).ready(function(){
+    $("#submit").on("click", function(event){
+        event.preventDefault();
+        temp = {name: $("#album-name").val(),
+                description: $("#album-description").val()};
+        $.ajax({url:"/albums",
+                method: "POST",
+                data: JSON.stringify(temp),
+                contentType: "application/json",
+                })
+            .done(function(data){
+                console.log(temp);
+                console.log(data);
+                window.location.href = "/albums/"+data.albumid+"/photos/html";
+            })
+    })
+});
+</script>
+{% endblock %}
+{% block content %}
+<body>
+<form 
+      method="POST"
+      role="form"
+      id="location-form">
+
+  <div class="form-group">
+    <label for="location-name">Name</label>
+    <input type="text"
+           class="form-control"
+           id="album-name"
+           name="name"
+           value=""
+           placeholder="Enter a name for the location">
+  </div>
+  <div class="form-group">
+    <label for="location-description">Description</label>
+    <input type="text"
+           class="form-control"
+           id="album-description"
+           name="description"
+           value=""
+           placeholder="Enter description">
+  </div>
+</form>
+<button id="submit" type="button" class="btn btn-primary">Create Album</button>
+{% endblock %}

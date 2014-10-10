@@ -1,0 +1,135 @@
+<!--<html>
+    <title>Test Panel</title>
+<head>
+    <link rel=stylesheet
+          type=text/css
+          href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel=stylesheet
+          type=text/css
+          href="{{ url_for('static', filename='css/bootstrap.css') }}">
+    <script src="{{ url_for('static', filename="js/jquery.js") }}"></script>
+    <script src="{{ url_for('static', filename="js/bootstrap.js") }}"></script>
+<link href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet"/>
+<script src="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
+-->
+{% extends "layout.html" %}
+{% block title %}Events{% endblock %}
+{% block head %}
+  {{ super() }}
+<script>
+$(document).ready(function(){
+$("#upload-form").hide();
+$("#create").on("click", function(event){
+    event.preventDefault();
+    var temp = {description: $("#event-description").val(),
+                name: $("#event-name").val()};
+    console.log(temp);
+
+    $.ajax({url: "/albums/{{photo.album_id}}/photos/{{photo.id}}/event",
+           method: "POST",
+           data: JSON.stringify(temp),
+           contentType: "application/json",
+           //dataType: "json"
+       }).done(function(data){
+            console.log(data);
+       });
+
+});
+$.getJSON("/events", function(data){
+    $.each(data.events, function(item,element){
+         $("#select-events").append($("<option></option>")
+                            .attr("value",element.id)
+                            .text(element.name)); 
+    });
+});
+$("#select-events").on("change", function(){
+    var selected = $("#select-events option:selected").val();
+    console.log(selected);
+    $.getJSON("/events/"+selected, function(data){
+        $("#show-event-description").text(data.description);
+    });
+});
+var create = false;
+$("#create-event").on("change", function(){
+    if($(this).is(":checked")){
+        $("#upload-form").show();
+        $("#selection").hide();
+        create = true;
+    } else {
+        $("#upload-form").hide();
+        $("#selection").show();
+        create = false;
+    }
+});
+
+$("#save-changes").on("click", function(){
+    if(create){
+        var temp = {description: $("#event-description").val(),
+            name: $("#event-name").val()};
+            console.log("Creating new event")
+    } else {
+        var temp = {event_id: $("#select-events option:selected").val()};
+        console.log("Linking existing event");
+    }
+
+        $.ajax({url: "/albums/{{photo.album_id}}/photos/{{photo.id}}/event",
+               method: "POST",
+               data: JSON.stringify(temp),
+               contentType: "application/json",
+               //dataType: "json"
+           }).done(function(data){
+                console.log(data);
+                console.log(temp);
+                window.location.href = "/albums/{{photo.album_id}}/photos/{{photo.id}}/html"
+           });
+    });
+});
+
+</script>
+{% endblock %}
+{% block content %}
+
+<a href="/events/html">Edit Events</a>
+<br />
+<div id="selection">
+Select Event
+<select class="form-control" id="select-events">
+<option></option>
+</select>
+<div id="show-event-description"></div>
+</div>
+  <div class="checkbox">
+    <label>
+      <input id="create-event" type="checkbox">Create Event
+    </label>
+  </div>
+
+
+<form 
+      method="POST"
+      role="form"
+      id="upload-form">
+
+  <div class="form-group">
+    <label for="event-name">Name</label>
+    <input type="text"
+           class="form-control"
+           id="event-name"
+           name="name"
+           value="{{photo.event.name}}"
+           placeholder="Enter a name for the event">
+  </div>
+  <div class="form-group">
+    <label for="event-description">Description</label>
+    <input type="text"
+           class="form-control"
+           id="event-description"
+           name="description"
+           value="{{photo.event.description}}"
+           placeholder="Enter year">
+  </div>
+</form>
+
+<button id="save-changes" type="button" class="btn btn-primary">Save changes</button>
+
+{% endblock %}

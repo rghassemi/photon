@@ -1,0 +1,66 @@
+{% extends "layout.html" %}
+{% block title %}Edit Events{% endblock %}
+{% block head %}
+  {{ super() }}
+<script>
+$(document).ready(function(){
+$(".submit-change").on("click", function(event){
+    event.preventDefault();
+    var eventid = $(this).data("event");
+    var name = $("#event-name-"+eventid).val();
+    var description = $("#event-description-"+eventid).val();
+    console.log(eventid);
+    console.log(name);
+    console.log(description);
+    var temp = {name: name,
+                description: description};
+    $.ajax({url: "/events/"+eventid,
+            method: "PUT",
+            data: JSON.stringify(temp),
+            contentType: "application/json"});
+        .done(function(data){
+            console.log(temp);
+            console.log(data);
+        })
+});
+
+$(".submit-delete").on("click", function(){
+    event.preventDefault();
+    var eventid = $(this).data("event");
+    $.ajax({url: "/events/"+eventid,
+            method: "DELETE"})
+        .done(function(data){
+            console.log(data);
+            $("#event-edit-"+eventid).remove();
+        })
+})
+
+});
+</script>
+{% endblock %}
+{% block content %}
+{% for event in events %}
+<form id="event-edit-{{event.id}}" role="form">
+  <div class="form-group">
+    <label for="event-name-{{event.id}}">Name</label>
+    <input type="text"
+           class="form-control"
+           value="{{event.name}}"
+           id="event-name-{{event.id}}"
+           placeholder="Enter name">
+  </div>
+  <div class="form-group">
+    <label for="event-description-{{event.id}}">Description</label>
+    <input type="text" 
+           class="form-control"
+           value="{{event.description}}"
+           id="event-description-{{event.id}}"
+           placeholder="Enter Description">
+  </div>
+  <button data-event="{{event.id}}" type="submit" class="submit-change btn btn-primary">Save Changes</button>
+  <button data-event="{{event.id}}" type="submit" class="btn submit-delete btn-danger">Delete</button>
+</form>
+
+{% endfor %}
+
+{% endblock %}

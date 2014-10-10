@@ -1,0 +1,106 @@
+{% extends "layout.html" %}
+{% block title %}Locations{% endblock %}
+{% block head %}
+  {{ super() }}
+<script>
+$(document).ready(function(){
+
+
+$("#location-form").hide();
+$.getJSON("/locations", function(data){
+    $.each(data.locations, function(item,element){
+         $("#select-locations").append($("<option></option>")
+                            .attr("value",element.id)
+                            .text(element.name)); 
+    });
+});
+$("#select-locations").on("change", function(){
+    var selected = $("#select-locations option:selected").val();
+    console.log(selected);
+    $.getJSON("/locations/"+selected, function(data){
+        $("#show-location-description").text(data.description);
+    });
+});
+var create = false;
+$("#create-location").on("change", function(){
+    if($(this).is(":checked")){
+        $("#location-form").show();
+        $("#location-selection").hide();
+        create = true;
+    } else {
+        $("#location-form").hide();
+        $("#location-selection").show();
+        create = false;
+    }
+});
+
+$("#location-save-changes").on("click", function(){
+    if(create){
+        var temp = {description: $("#location-description").val(),
+            name: $("#location-name").val()};
+            console.log("Creating new location")
+    } else {
+        var temp = {location_id: $("#select-locations option:selected").val()};
+        console.log("Linking existing location");
+    }
+
+        $.ajax({url: "/albums/{{photo.album_id}}/photos/{{photo.id}}/location",
+               method: "POST",
+               data: JSON.stringify(temp),
+               contentType: "application/json",
+               //dataType: "json"
+           }).done(function(data){
+                console.log(data);
+                console.log(temp);
+                window.location.href = "/albums/{{photo.album_id}}/photos/{{photo.id}}/html"
+           });
+    });
+});
+
+</script>
+{% endblock %}
+{% block content %}
+
+<a href="/locations/html">Edit Locations</a>
+<br />
+<div id="location-selection">
+Select location
+<select class="form-control" id="select-locations">
+<option></option>
+</select>
+<div id="show-location-description"></div>
+</div>
+  <div class="checkbox">
+    <label>
+      <input id="create-location" type="checkbox">Create Location
+    </label>
+  </div>
+
+
+<form 
+      method="POST"
+      role="form"
+      id="location-form">
+
+  <div class="form-group">
+    <label for="location-name">Name</label>
+    <input type="text"
+           class="form-control"
+           id="location-name"
+           name="name"
+           value="{{photo.location.name}}"
+           placeholder="Enter a name for the location">
+  </div>
+  <div class="form-group">
+    <label for="location-description">Description</label>
+    <input type="text"
+           class="form-control"
+           id="location-description"
+           name="description"
+           value="{{photo.location.description}}"
+           placeholder="Enter description">
+  </div>
+</form>
+<button id="location-save-changes" type="button" class="btn btn-primary">Save changes</button>
+
+{% endblock %}

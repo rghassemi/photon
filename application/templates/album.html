@@ -1,0 +1,93 @@
+{% extends "layout.html" %}
+{% block title %}{{album.name}}{% endblock %}
+{% block head %}
+  {{ super() }}
+<script>
+$(document).ready(function(){
+    $.fn.editable.defaults.mode = 'inline';
+    $('#name').editable({
+        type: 'text',
+        pk: {{album.id}},
+        url: '/edit_album',
+        title: 'Enter Name',
+        success: function(response, newValue) {
+            if(response.status == 'error') return response.msg;
+            //msg will be shown in editable form
+        }
+    });
+    $('#description').editable({
+        type: 'text',
+        pk: {{album.id}},
+        url: '/edit_album',
+        title: 'Enter Description',
+        success: function(response, newValue) {
+            if(response.status == 'error') return response.msg;
+            //msg will be shown in editable form
+        }
+    });
+});
+</script>
+{% endblock %}
+{% block content %}
+
+<div class="row">
+<div class="col-md-2">
+
+  <div class="list-group">
+    <a href="/albums/html" class="list-group-item">
+      <span  id="back-to-album" class="list-group-item-text">Back to Albums</span>
+    </a>
+  </div>
+  <div class="list-group">
+    <a href="/albums/{{album.id}}/photos/upload" class="list-group-item">
+      <span  id="back-to-album" class="list-group-item-text">Upload Photos</span>
+    </a>
+  </div>
+  <div class="list-group">
+    <a href="#" class="list-group-item">
+      <h5 class="list-group-item-heading"><span class="location">{{album.name}}</span></h5>
+      <span id="description" data-type="textarea" class="list-group-item-text">{{album.description}}</span>
+    </a>
+  </div>
+
+  <ul id="locations" class="list-group">
+  {% for location in locations %}
+     <li class="list-group-item">{{location.name}}</li>
+  {% endfor %}
+  </ul>
+  <ul id="events" class="list-group">
+  {% for event in events %}
+     <li class="list-group-item">{{event.name}}</li>
+  {% endfor %}
+  </ul>
+</div>
+
+<div class="col-md-10">
+{% for photo in album.photos %}
+<a href="/albums/{{album.id}}/photos/{{photo.id}}/html">
+<img id={{photo.id}} data-photoid="" src="/albums/{{album.id}}/photos/{{photo.id}}/thumb"/>
+</a>
+{% endfor %}
+</div>
+</div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+      </div>
+      <div class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+
+
+{% endblock %}

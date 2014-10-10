@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block title %}View Photo{% endblock %}
+{% block head %}
+  {{ super() }}
+    <script>
+    $(document).ready(function(){
+        //$(".container").css("background-image", "{{ url_for('static', filename='img/bg.png') }}");
+    });
+    </script>
+{% endblock %}
+{% block content %}
+<div class="container">
+    <span id="year" class="badge">2013</span>
+    <span id="month" class="badge">NOV</span>
+    <span id="day" class="badge">23</span>
+
+</div>
+{% endblock %}

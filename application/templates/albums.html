@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+{% block title %}All Albums{% endblock %}
+{% block head %}
+  {{ super() }}
+<script>
+$(document).ready(function(){
+
+});
+</script>
+{% endblock %}
+{% block content %}
+<div class="container">
+<div class="row">
+<div class="col-md-6">
+{% for album in albums %}
+<div class="list-group">
+<a href="/albums/{{album.id}}/photos/html" class="list-group-item">
+  <h5 class="list-group-item-heading"><span class="name">{{album.name}}</span></h5>
+  <span id="description" data-type="textarea" class="list-group-item-text">{{album.description}}</span>
+</a>
+</div>
+{% endfor %}
+<div class="list-group">
+<a href="/albums/new" class="list-group-item">
+  <h5 class="list-group-item-heading"><span class="name">Create New Album</span></h5>
+  <span id="description" data-type="textarea" class="list-group-item-text"></span>
+</a>
+</div>
+</div>
+</div>
+</div>
+{% endblock %}
